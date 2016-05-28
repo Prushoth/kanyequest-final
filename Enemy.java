@@ -50,7 +50,6 @@ public abstract class Enemy {
     }
     public void attack(Kanye k){}
 
-    public void draw(Graphics g, KanyePanel k){}
 
 
 }

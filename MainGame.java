@@ -197,15 +197,17 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
         }
         if(keys[KeyEvent.VK_S]){ //move DOWN
-            System.out.println(player.getX() + offset[0] + " " + (player.getY() + offset[1]));
+            //System.out.println(player.getX() + offset[0] + " " + (player.getY() + offset[1]));
             if(player.getY() + offset[YVAL] <= 920){
-                //System.out.println("shift");
+                //System.out.println("down");
                 player.move(0, 1);
             }
             else if(offset[YVAL] >= -mapsize[YVAL]){
+                //System.out.println("not down");
+                System.out.println(player.getY() + offset[1]);
                 edge = true;
                 player.move(0, 1);
-                offset[YVAL] -= player.getSpeed();
+                offset[YVAL] -= 5;
                 displacement[YVAL] = -1;
             }
         }
@@ -332,8 +334,8 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             exploiter.remove();
         }
 
-        System.out.println(player.getX() + " curpos " + player.getY());
-        System.out.println(offset[0] + " offset " + offset[1]);
+        //System.out.println(player.getX() + " curpos " + player.getY());
+        //System.out.println(offset[0] + " offset " + offset[1]);
 
 
         for(Iterator<Fans> faniter = fans.iterator();  faniter.hasNext();) {
@@ -433,6 +435,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
 
     public void paintComponent(Graphics g){
+        //System.out.println(offset[0] + " " + offset[1]);
         g.drawImage(map, offset[XVAL], offset[YVAL], this);
 
         for(Bullet b : bullets){
@@ -440,7 +443,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 		}
 
         for(Fans e: fans ){
-            e.draw(g, this);
+            e.draw(g, this, offset);
         }
 
         for (TripMine t : tripmines){
@@ -464,7 +467,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             p.draw(g, this);
         }
         //System.out.println((player.getX()) + " " + (player.getY()));
-		player.draw(g, this);
+		player.draw(g, this, offset);
 
 	}
 

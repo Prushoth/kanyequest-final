@@ -34,17 +34,20 @@ public class Fans extends Enemy{
         }
         atkcounter ++;
     }
-    @Override
-    public void draw(Graphics g, KanyePanel k){
+    
+    public void draw(Graphics g, KanyePanel k, int[] offset){
+        double screenx = coords[0] + offset[0]; //position of object relative to screen, not map
+        double screeny = coords[1] + offset[1];
+
         //is there a way to simplify this shit
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
-        g2d.translate(coords[0], coords[1]); //move graphics2d object to center of image
+        g2d.translate(screenx, screeny); //move graphics2d object to center of image
         g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
         g2d.drawImage(sprite, -30, -30, null); //coords are top left of image
         g2d.setTransform(oldAT); //reset
 
         g.setColor(Color.green);
-        g.fillRect((int)coords[0] - 50,(int)coords[1] - 40, hp, 10); //hp
+        g.fillRect((int)screenx - 50,(int)screeny - 40, hp, 10); //hp
     }
 }
