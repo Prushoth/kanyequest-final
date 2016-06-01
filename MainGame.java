@@ -167,7 +167,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             if(player.getX() + offset[0] <= 1460){
                 player.move(1, 0);
             }
-            else if(offset[XVAL] >= -mapsize[XVAL]) {
+            else if(offset[XVAL] >= -mapsize[XVAL] + 1500) {
                 edge = true;
                 player.move(1, 0);
                 offset[XVAL] -= player.getSpeed();
@@ -202,12 +202,11 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                 //System.out.println("down");
                 player.move(0, 1);
             }
-            else if(offset[YVAL] >= -mapsize[YVAL]){
+            else if(offset[YVAL] >= -mapsize[YVAL] + 1000){
                 //System.out.println("not down");
-                System.out.println(player.getY() + offset[1]);
-                edge = true;
+                //System.out.println(player.getY() + offset[YVAL]);
                 player.move(0, 1);
-                offset[YVAL] -= 5;
+                offset[YVAL] -= player.getSpeed();
                 displacement[YVAL] = -1;
             }
         }
@@ -238,11 +237,17 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         player.updatePlayer();
         mainCounter ++;
         bullcounter ++;
+        if(mainCounter++ == Integer.MAX_VALUE){ //integer will not overflow if game runs too long
+            mainCounter = 0;
+        }
+        if(bullcounter++ == Integer.MAX_VALUE){
+            bullcounter = 0;
+        }
 
         //region SPAWNING OBJECTS
         if(mainCounter % 200 == 0){ //tries spawning new powerup at a set interval
             int randP = rn.nextInt(2);
-            int[] randpos = getValidPoint();
+            int[] randpos = getValidPoints();
             if (randP == 0) {
                 powerList.add(new Yeezys(randpos[XVAL], randpos[YVAL], yeezypic));
             }
@@ -262,12 +267,13 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         if (fans.size() == 0) { //code for testing only
             for (int i  = 0; i < 10; i++) {
-                fans.add(new Fans(200, 200, 50, 50, fanpic));
+                int[] spawnpos = getValidPoints();
+                fans.add(new Fans(spawnpos[XVAL], spawnpos[YVAL], 50, 50, fanpic));
             }
         }
 
         if(vanList.size() == 0){
-            int[] vanpos = getValidPoint();
+            int[] vanpos = getValidPoints();
             vanList.add(new Van(vanpos[XVAL], vanpos[YVAL], vanpic));
             paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, fanpic, vanList.get(0)));
             paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, fanpic, vanList.get(0)));
@@ -293,9 +299,6 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                     mineiter.remove();
                 }
             }
-            if(edge){
-                t.changePos(displacement[XVAL] * player.getSpeed(), displacement[YVAL] * player.getSpeed());
-            }
         }
 
         for (Iterator<Bullet> buliter = bullets.iterator(); buliter.hasNext(); ) {
@@ -319,6 +322,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 			if (b.getX() > mapsize[XVAL] || b.getX() < 0 || b.getY() > mapsize[YVAL] || b.getY() < 0) {
 				remove = true;
 			}
+
             if(remove){
                 buliter.remove();
             }
@@ -334,19 +338,15 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             exploiter.remove();
         }
 
-        //System.out.println(player.getX() + " curpos " + player.getY());
-        //System.out.println(offset[0] + " offset " + offset[1]);
-
-
         for(Iterator<Fans> faniter = fans.iterator();  faniter.hasNext();) {
             Fans curenemy  = faniter.next();
-            double tmpang = Math.atan2(player.getY() - curenemy.getY(), player.getX() - curenemy.getX());
+            double dx = player.getX() - curenemy.getX(); //delta x, total horizontal distance
+            double dy = player.getY() - curenemy.getY(); //delta y, total vertical distance
+            double tmpang = Math.atan2(dy, dx);
             double tmpx = 2 * Math.cos(tmpang);
             double tmpy = 2 * Math.sin(tmpang);
 
             //moving towards player
-            double dx = player.getX() - curenemy.getX(); //delta x, total horizontal distance
-            double dy = player.getY() - curenemy.getY(); //delta y, total vertical distance
             double dist = Math.max(1, Math.hypot(dx, dy));
             double d2 = Math.pow(dist, 2);
             tmpx -= 130 * dx / d2;
@@ -376,10 +376,6 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                 }
             }
 
-            /*if (edge) {//compensate for faster movement due to scrolling at a speed of 5
-                tmpx += displacement[XVAL] * (player.getSpeed() - 2);
-                tmpy += displacement[YVAL] * (player.getSpeed() - 2);
-            }*/
             curenemy.move(tmpx, tmpy, tmpang);
             curenemy.attack(player);
 
@@ -399,25 +395,21 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                 }
             }
 
-            p.move(player, paparazzi, fans, displacement);
+            p.move(player, paparazzi, fans);
         }
 
         for(Iterator<Van> vanIter = vanList.iterator();  vanIter.hasNext();){
             Van curvan = vanIter.next();
-            if(edge){
-                curvan.changePos(displacement[XVAL] * player.getSpeed(), displacement[YVAL] * player.getSpeed());
-            }
         }
         //endregion
 	}
 
-    public int[] getValidPoint(){
+    public int[] getValidPoints(){
         int randx, randy;
         do{
             randx = rn.nextInt(5000);
             randy = rn.nextInt(5000);
         }while(randx < 0 || randx > 5000 || randy < 0 || randy > 5000); //checks if point is colliding or off the map
-
 
         return new int[]{randx, randy};
 
@@ -452,19 +444,19 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (Paparazzi p: paparazzi){
             if(isOffscreen(p.getX(), p.getY())){
-                p.draw(g, this, false);
+                p.draw(g, this, offset, false);
             }
             else{
-                p.draw(g, this, false);
+                p.draw(g, this, offset, false);
             }
 
         }
 
         for(Van v : vanList){
-            v.draw(g, this);
+            v.draw(g, this, offset);
         }
         for (Powerup p :  powerList){
-            p.draw(g, this);
+            p.draw(g, this, offset);
         }
         //System.out.println((player.getX()) + " " + (player.getY()));
 		player.draw(g, this, offset);

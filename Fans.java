@@ -34,7 +34,7 @@ public class Fans extends Enemy{
         }
         atkcounter ++;
     }
-    
+
     public void draw(Graphics g, KanyePanel k, int[] offset){
         double screenx = coords[0] + offset[0]; //position of object relative to screen, not map
         double screeny = coords[1] + offset[1];
