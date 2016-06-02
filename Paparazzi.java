@@ -10,7 +10,7 @@ import java.awt.geom.*;
 public class Paparazzi extends Enemy {
     private BufferedImage sprite;
     private double ang, returnang;
-    private boolean takenpic, capturing, gotPic;
+    private boolean takenpic, capturing, shouldRemove;
     private Van home;
     private int capturetime, speed;
 
@@ -20,7 +20,7 @@ public class Paparazzi extends Enemy {
         coords[1] = y;
         this.home = home;
         this.sprite = sprite;
-        gotPic = false;
+        shouldRemove = false;
         speed = 2;
     }
 
@@ -44,7 +44,7 @@ public class Paparazzi extends Enemy {
             g2d.setTransform(oldAT); //reset
 
             if(takenpic){
-                //draw camera flash
+                //draw camera flash on entire screen, then fade
             }else{
                 g.setColor(Color.yellow);
                 g.fillRect((int)screenx - 30,(int)screeny + 40, (300 - capturetime) / 5, 10); //hp
@@ -55,6 +55,9 @@ public class Paparazzi extends Enemy {
             //how to draw line at edge of screen closes to obj??
             //g.drawLine(1000, 500, (int)Math.round(1 * Math.cos(ang)), (int)Math.round(1 * Math.sin(ang)));
         }
+        g.setColor(new Color(34, 139, 34));
+        g.fillRect((int)screenx - 50,(int)screeny - 40, hp, 10); //hp
+
 
     }
     public boolean inRadius(Kanye k){
@@ -110,8 +113,8 @@ public class Paparazzi extends Enemy {
         //tmpx += displacement[0] * (k.getSpeed() - 2);
         //tmpy += displacement[1] * (k.getSpeed() - 2);
 
-        if(Math.hypot(home.getX() - coords[0], home.getY() - coords[1]) < 10 && takenpic){
-            gotPic = true;
+        if((Math.hypot(home.getX() - coords[0], home.getY() - coords[1]) < 10 && takenpic) || hp <= 0){
+            shouldRemove = true;
         }
 
         if(takenpic || !inRadius(k)){
@@ -135,9 +138,10 @@ public class Paparazzi extends Enemy {
             }
         }
     }
+
     public boolean picTaken(){return takenpic; }
     public boolean checkRemove(){
-        return gotPic;
+        return shouldRemove;
     }
 
     public Van getHome(){

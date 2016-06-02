@@ -24,16 +24,16 @@ public abstract class Powerup {
             finish = true;
         }
     }
+
     public boolean getFinish() {
         return finish;
     }
-
-
 
     public boolean collide(double px, double py, int dist){
         return (Math.hypot(x - px, y  - py) < dist);
 
     }
+
     public double getX(){
         return x;
     }
