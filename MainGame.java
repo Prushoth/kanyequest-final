@@ -65,7 +65,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
     private Weapon[] allweps;
 
 	private ArrayList<Bullet> bullets= new ArrayList<Bullet>();
-    private ArrayList<Fans> fans= new ArrayList<Fans>();
+    private ArrayList<Fan> fans= new ArrayList<Fan>();
     private ArrayList<TripMine> tripmines = new ArrayList<TripMine>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
     private ArrayList<Paparazzi> paparazzi = new ArrayList<Paparazzi>();
@@ -268,7 +268,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         if (fans.size() == 0) { //code for testing only
             for (int i  = 0; i < 10; i++) {
                 int[] spawnpos = getValidPoints();
-                fans.add(new Fans(spawnpos[XVAL], spawnpos[YVAL], 50, 50, fanpic));
+                fans.add(new Fan(spawnpos[XVAL], spawnpos[YVAL], 50, 50, fanpic));
             }
         }
 
@@ -292,7 +292,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (Iterator<TripMine> mineiter = tripmines.iterator(); mineiter.hasNext(); ) {
             TripMine t = mineiter.next();
-            for(Fans e : fans){
+            for(Fan e : fans){
                 if(e.collide(t.getX(), t.getY(), 40)){
                     explosions.add(t.blowUP());
                     mineiter.remove();
@@ -338,8 +338,8 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             exploiter.remove();
         }
 
-        for(Iterator<Fans> faniter = fans.iterator();  faniter.hasNext();) {
-            Fans tmpf  = faniter.next();
+        for(Iterator<Fan> faniter = fans.iterator();  faniter.hasNext();) {
+            Fan tmpf  = faniter.next();
 
 
             tmpf.move(player, fans, paparazzi);
@@ -357,7 +357,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                 pappIter.remove();
                 for (int i  = 0; i < 10; i++) {
                     int[] tmppos = getValidPoints();
-                    fans.add(new Fans(tmppos[XVAL], tmppos[YVAL], 50, 50, fanpic));
+                    fans.add(new Fan(tmppos[XVAL], tmppos[YVAL], 50, 50, fanpic));
                 }
             }
 
@@ -399,7 +399,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
 		}
 
-        for(Fans e: fans ){
+        for(Fan e: fans ){
             if(!isOffscreen(e.getX(), e.getY())){
                 e.draw(g, this, offset);
             }

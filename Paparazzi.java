@@ -68,7 +68,7 @@ public class Paparazzi extends Enemy {
     }
 
 
-    public void move(Kanye k, ArrayList<Paparazzi> plist, ArrayList<Fans> flist){
+    public void move(Kanye k, ArrayList<Paparazzi> plist, ArrayList<Fan> flist){
         //moving towards player
         double dx = k.getX() - coords[0];
         double dy = k.getY() - coords[1];
@@ -98,7 +98,7 @@ public class Paparazzi extends Enemy {
             }
         }
 
-        for (Fans f : flist) {
+        for (Fan f : flist) {
             dx = coords[0] - f.getX(); //delta x, total horizontal distance
             dy = coords[1] - f.getY(); //delta y, total vertical distance
             dist = Math.max(1, Math.hypot(dx, dy));
