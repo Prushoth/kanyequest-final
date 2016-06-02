@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.awt.geom.*;
 
 public class AssaultRifle extends Weapon {
+    private String weptype;
     private int damage, reloadtime, firerate;
     private Image icon;
 
@@ -16,6 +17,7 @@ public class AssaultRifle extends Weapon {
         super(icon, damage);
         reloadtime = reload;
         this.firerate = firerate;
+        weptype = "assaultrifle";
     }
     public int reloadTime(){
         return reloadtime;
@@ -28,7 +30,7 @@ public class AssaultRifle extends Weapon {
 
     @Override
     public ArrayList<Bullet> shoot(double x, double y, double ang, ArrayList<Bullet> allbuls, BufferedImage pic){
-        allbuls.add(new Bullet(x, y , ang, pic, 1));
+        allbuls.add(new Bullet(x, y , ang, pic, 1,1,10));
         return allbuls;
     }
 }

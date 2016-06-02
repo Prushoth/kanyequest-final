@@ -108,7 +108,7 @@ public class Kanye{
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
         g2d.translate(coords[0], coords[1]); //move graphics2d object to center of image
         g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
-        g2d.drawImage(sprites[1], -40, -82, null); //codords are top left of image, gun sticks out 42 pixels
+        g2d.drawImage(sprites[1], -40, -82,k); //codords are top left of image, gun sticks out 42 pixels
         g2d.setTransform(oldAT); //reset
 
         //g.drawImage(sprite, (int)Math.round(coords[0]) - 40, (int)Math.round(coords[1]) - 40, k);
