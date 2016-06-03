@@ -83,7 +83,7 @@ public class Kanye{
     }
 
     public void move(double displacedx, double displacedy){
-        System.out.println("moving" + displacedx + " " + displacedy);
+        //System.out.println("moving" + displacedx + " " + displacedy);
         coords[0] += displacedx * speed;
         coords[1] += displacedy * speed;
     }
@@ -101,12 +101,12 @@ public class Kanye{
             System.exit(0);
         }
     }
-    public void draw(Graphics g, KanyePanel k){
+    public void draw(Graphics g, KanyePanel k, int[] offset){
 
         //is there a way to simplify this shit
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
-        g2d.translate(coords[0], coords[1]); //move graphics2d object to center of image
+        g2d.translate(coords[0] + offset[0], coords[1] + offset[1]); //move graphics2d object to center of image
         g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
         g2d.drawImage(sprites[1], -40, -82,k); //codords are top left of image, gun sticks out 42 pixels
         g2d.setTransform(oldAT); //reset

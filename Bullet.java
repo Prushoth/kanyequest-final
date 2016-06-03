@@ -42,7 +42,6 @@ public class Bullet {
         coords[0] += speed * Math.cos(ang);
         coords[1] += speed * Math.sin(ang);
         if(bulletType ==FLAME){
-            if (ang >)
         }
 
     }

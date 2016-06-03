@@ -24,16 +24,16 @@ public abstract class Powerup {
             finish = true;
         }
     }
+
     public boolean getFinish() {
         return finish;
     }
-
-
 
     public boolean collide(double px, double py, int dist){
         return (Math.hypot(x - px, y  - py) < dist);
 
     }
+
     public double getX(){
         return x;
     }
@@ -49,7 +49,10 @@ public abstract class Powerup {
     public void effect(Kanye k){}
 
     public abstract int getNum();
-    public void draw(Graphics g, KanyePanel k){g.drawImage(sprite, (int)x,(int)y, k);}
+
+    public void draw(Graphics g, KanyePanel k, int[] offset){
+        g.drawImage(sprite, (int)Math.round(x + offset[0]),(int)Math.round(y + offset[1]), k);
+    }
     //public String toString(){}
 }
 
