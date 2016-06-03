@@ -228,7 +228,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 		updateGame();
 
         edge = false;
-        displacement = new int[]{0, 0};
+        displacement = new int[]{0, 0}; 
     }
 
 	public void updateGame() {
@@ -256,7 +256,6 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         }
 
 		if(player.isShooting()){
-            //System.out.println("true");
 			if(bullcounter >= player.getWep().getFirerate()){
                 System.out.println("shoot");
                 //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET

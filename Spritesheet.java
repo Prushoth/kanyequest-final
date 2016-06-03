@@ -15,6 +15,7 @@ public class Spritesheet {
         BufferedImage spriteSheet = null;
 
         this.numSprites = numRows * numCols;
+        name = fileName;
         spriteSizeX = spriteLength;
         spriteSizeY = spriteWidth;
         allSprites = new BufferedImage[numSprites];
@@ -38,6 +39,6 @@ public class Spritesheet {
     }
 
     public BufferedImage getSprite(int increment){
-        return allSprites[increment % numSprites];
+        return allSprites[increment];
     }
 }
