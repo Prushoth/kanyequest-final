@@ -12,7 +12,8 @@ public class Fan extends Enemy{
     private int atkspeed;
 
     public Fan(double x, double y, int hp, int atkspeed, BufferedImage sprite){
-        super(x, y, hp, sprite);
+        super(x, y, hp);
+        this.sprite = sprite;
         coords[0] = x;
         coords[1] = y;
         this.sprite = sprite;
@@ -81,7 +82,7 @@ public class Fan extends Enemy{
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
         g2d.translate(screenx, screeny); //move graphics2d object to center of image
-        g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
+        g2d.rotate(ang); //rotate around the center of image
         g2d.drawImage(sprite, -30, -30, null); //coords are top left of image
         g2d.setTransform(oldAT); //reset
 

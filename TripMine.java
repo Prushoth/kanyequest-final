@@ -33,11 +33,11 @@ public class TripMine {
     }
 
     public Explosion blowUP(){
-        return new Explosion(x, y, 25, 75);
+        return new Explosion(x, y, 40, 75);
     }
 
-    public void draw(Graphics g, KanyePanel k){
-        g.drawImage(sprite, (int)Math.round(x), (int)Math.round(y), k);
+    public void draw(Graphics g, KanyePanel k, int[] offset){
+        g.drawImage(sprite, (int)Math.round(x) + offset[0], (int)Math.round(y) + offset[1], k);
         //g.drawImage(sprite, -40 , -40, k);
     }
 }
