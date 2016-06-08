@@ -26,6 +26,7 @@ import javax.imageio.*;
 import java.io.*;
 import java.awt.MouseInfo;
 import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 
 public class MainGame extends JFrame implements ActionListener{
 	private javax.swing.Timer gameTimer;
@@ -63,7 +64,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 	private boolean[] keys;
     private int[] offset, displacement, mapsize; //offset of map for scrolling
     private Weapon[] allweps;
-
+    private boolean drawLaser;
 	private ArrayList<Bullet> bullets= new ArrayList<Bullet>();
     private ArrayList<Fan> fans = new ArrayList<Fan>();
     private ArrayList<TripMine> tripmines = new ArrayList<TripMine>();
@@ -72,17 +73,16 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
     private ArrayList<Van> vanList = new ArrayList<Van>();
     private ArrayList<Powerup> powerList = new ArrayList<Powerup>();
 
+	private MainGame mainFrame;
     private BufferedImage[] kanyepics;
     private BufferedImage[] enemyPics;
-    private BufferedImage map, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic, mapmask;
-
-    private MainGame mainFrame;
     private Random rn = new Random();
 	private Kanye player;
 
 	private int mx , my, mainCounter, shootCounter;
 	private double ang;
 
+    private BufferedImage map, fanpic, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic, mapmask, chainsawpic, fireball;
 
 
     private boolean edge;
@@ -109,13 +109,17 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             bulletpic = ImageIO.read(new File("resources/images/bullet.png"));
             kanyepics = new BufferedImage[]{ImageIO.read(new File("resources/images/sprites/playersprites/holdinggun.png")), ImageIO.read(new File("resources/images/sprites/playersprites/shooting1.png")), ImageIO.read(new File("resources/images/sprites/playersprites/gunflameithink.png"))};
             System.out.println("2");
-            allweps = new Weapon[]{new AssaultRifle(ImageIO.read(new File("resources/images/m4a4.png")), 10, 3, 20), new Shotgun(ImageIO.read(new File("resources/images/m4a4.png")), 25, 85)};
+            allweps = new Weapon[]{new AssaultRifle(ImageIO.read(new File("resources/images/m4a4.png")), 10, 3, 20), new Shotgun(ImageIO.read(new File("resources/images/m4a4.png")), 25, 85), new Flamethrower(ImageIO.read(new File("resources/images/m4a4.png")), 1, 30, 2), new RocketLauncher(ImageIO.read(new File("resources/images/m4a4.png")), 30, 100), new LaserBeam(ImageIO.read(new File("resources/images/m4a4.png")),1), new Pistol(ImageIO.read(new File("resources/images/m4a4.png")),10,10 ), new Chainsaw(ImageIO.read(new File("resources/images/m4a4.png")), 5)};
             trippic = ImageIO.read(new File("resources/images/tripmine.png"));
             vanpic = ImageIO.read(new File("resources/images/van.png"));
+
             System.out.println("3");
             yeezypic = ImageIO.read(new File("resources/images/YeezyBoost.png"));
             vestpic = ImageIO.read(new File("resources/images/armour.png"));
-            player = new Kanye(600 + offset[0], 600 + offset[YVAL], kanyepics, allweps[YVAL]);
+            chainsawpic = ImageIO.read(new File("resources/images/chainsaw.png"));
+            fireball = ImageIO.read(new File("resources/images/firebullet.png"));
+            System.out.println("4");
+            player = new Kanye(600 + offset[0], 600 + offset[YVAL], kanyepics, allweps[2]);
             System.out.println("SUCCESS");
             //new Flamethrower
 
@@ -149,9 +153,12 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 		player.setShooting(false);
 	}
 	public void mousePressed(MouseEvent e){
-        System.out.println("clicked");
+
+
 		player.setShooting(true);
 	}
+
+
     public void mouseDragged(MouseEvent e){
 		mx = e.getX();
 		my = e.getY();
@@ -248,21 +255,40 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         }
 
         //region SPAWNING OBJECTS
-        if(mainCounter % 200 == 0 && powerList.size() < 5){ //tries spawning new powerup at a set interval, avoids spawning too man
+        if(mainCounter % 200 == 0 && powerList.size() < 5) { //tries spawning new powerup at a set interval, avoids spawning too man
             int choice = rn.nextInt(2);
 
             int[] randpos = getValidPoints();
             powerList.add(new Powerup(new String[]{"yeezys", "vest"}[choice], randpos[XVAL], randpos[YVAL], 4000, new BufferedImage[]{yeezypic, vestpic}[choice]));
         }
 
-		if(player.isShooting() && shootCounter - player.getWep().getFirerate() >= 0){
-            System.out.println("shoot");
-            //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
-            bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
-            shootCounter = 0;
+		if(player.isShooting()){
+            //System.out.println("true");
+            if (!player.getWep().getName().equals("laserbeam")) {
+                if(shootCounter >= player.getWep().getFirerate()){
+
+                    //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
+                    if (!player.getWep().getName().equals("flamethrower")){
+
+                        bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
+                    }
+                    else{
+                        bullets= player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, fireball);
+                    }
+
+
+                    shootCounter = 0;
+                }
+            }
+
+
+
+
+
 		}
 
-        if(fans.size() == 0) { //code for testing only
+
+        if (fans.size() == 0) { //code for testing only
             for (int i  = 0; i < 10; i++) {
                 int[] spawnpos = getValidPoints();
                 fans.add(new Fan(spawnpos[XVAL], spawnpos[YVAL], 50, 50, enemyPics[rn.nextInt(3)]));
@@ -287,6 +313,25 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
         }
 
+       if (player.getWep().getName().equals("laserbeam")) {
+
+                for (Fan f: fans){
+
+                    if (player.getLaser().onLine(f.getX(), f.getY(), 30)){
+                        System.out.println(true);
+                        f.changeHP(-1);
+
+                    }
+                }
+                for (Paparazzi p: paparazzi){
+                    if (player.getLaser().onLine(p.getX(), p.getY(), 30)){
+                        p.changeHP(-1);
+                    }
+                }
+
+
+        }
+
         for (Iterator<TripMine> mineiter = tripmines.iterator(); mineiter.hasNext(); ) {
             TripMine t = mineiter.next();
             for(Fan e : fans){
@@ -304,21 +349,42 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
             for(Enemy e : fans){//.addAll(paparazzi)){
                 if(e.collide(b.getX(), b.getY(), 35)){
-                    System.out.println("hit");
+                    if (player.getWep().equals("pistol")){
+                          fans.remove(e);
+
+                    }
+
                     e.changeHP(-player.getWep().getDamage());
                     remove = true;
+                    if (b.getType() == 3){
+                        explosions.add(new Explosion(b.getX(), b.getY(), 50, 70));
+                    }
                 }
             }
-            for(Enemy p : paparazzi){//.addAll(paparazzi)){
-                if(p.collide(b.getX(), b.getY(), 35)){
-                    p.changeHP(-player.getWep().getDamage());
-                    remove = true;
+            for(Enemy e : paparazzi){//.addAll(paparazzi)){
+                if(e.collide(b.getX(), b.getY(), 35)){
+                    if(player.getWep().equals("pistol")){
+                        paparazzi.remove(e);
+                    }
+                    e.changeHP(-player.getWep().getDamage());
+
+
+                    if (b.getType() == 3){
+                        explosions.add(new Explosion(b.getX(), b.getY(), 50, 70));
+                    }
                 }
+
             }
 
 			if (b.getX() > mapsize[XVAL] || b.getX() < 0 || b.getY() > mapsize[YVAL] || b.getY() < 0) {
 				remove = true;
 			}
+            if(b.getType()== 2){
+                if (Math.hypot(b.getX()- player.getX(), b.getY()-player.getY())>= 500){
+                    remove = true;
+                }
+
+            }
 
             if(remove){
                 buliter.remove();
@@ -342,6 +408,9 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
             if(tmpf.getHP() <= 0){
                 faniter.remove();
+            }
+            if (player.getWep().getName().equals("Chainsaw")){
+
             }
         }
 
@@ -389,7 +458,11 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         //System.out.println(offset[0] + " " + offset[1]);
         g.drawImage(map, offset[XVAL], offset[YVAL], this);
 
+
+
         for(Bullet b : bullets){
+
+
             if(!isOffscreen(b.getX(), b.getY())){
                 b.draw(g, this, offset);
             }
@@ -399,7 +472,18 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             if(!isOffscreen(e.getX(), e.getY())){
                 e.draw(g, this, offset);
             }
+            if (player.getWep().getName().equals("laserbeam")){
+                if (player.getLaser().onLine(e.getX(), e.getY(), 30)) {
+                    player.drawLaser(g, e.getX(), e.getY(), true);
+                }
+                else{
+                    player.drawLaser(g, e.getX(), e.getY(), false);
+
+                }
+            }
+
         }
+
 
         for (TripMine t : tripmines){
             if(!isOffscreen(t.getX(), t.getY())){
@@ -409,12 +493,20 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (Paparazzi p: paparazzi){
             if(isOffscreen(p.getX(), p.getY())){ //arrow will point to enemy if offscreen
-                p.draw(g, this, offset, false, enemyPics);
+                p.draw(g, this, offset, false, enemyPics, player.getX(), player.getY());
             }
             else{
-                p.draw(g, this, offset, false, enemyPics);
+                p.draw(g, this, offset, false, enemyPics, player.getX(), player.getY());
             }
 
+            if (player.getWep().getName().equals("laserbeam")) {
+                if (player.getLaser().onLine(p.getX(), p.getY(), 30)) {
+                    player.drawLaser(g, p.getX(), p.getY(), true);
+                } else {
+                    player.drawLaser(g, p.getX(), p.getY(), false);
+
+                }
+            }
         }
 
         for(Van v : vanList){
@@ -423,13 +515,13 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
         }
 
+
         for (Powerup p :  powerList){
             if(!isOffscreen(p.getX(), p.getY())){
                 p.draw(g, this, offset);
             }
         }
-
-		player.draw(g, this, offset);
+		player.draw(g, this, offset, chainsawpic);
 
 	}
 

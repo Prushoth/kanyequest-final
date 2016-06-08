@@ -20,17 +20,18 @@ public abstract class Weapon {
         sprite = i;
         buldamage = damage;
     }
+    public BufferedImage getSprite(){
+        return sprite;
+    }
 
     public abstract int getFirerate();
 
-    public abstract ArrayList<Bullet> shoot(double x, double y, double ang, ArrayList<Bullet> allbuls, BufferedImage pic);
+    public abstract ArrayList<Bullet> shoot(double x, double y, double ang, ArrayList<Bullet> allbuls, BufferedImage bulpic);
 
     public int getDamage(){
         return buldamage;
     }
 
-    public String getName(){
-        return weptype;
-    }
+    public abstract String getName();
 
 }

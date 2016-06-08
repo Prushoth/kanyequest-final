@@ -9,10 +9,11 @@ import java.awt.image.BufferedImage;
 
 public class Shotgun extends Weapon  {
     private int firerate;
-
+    private String weptype;
     public Shotgun(BufferedImage icon, int damage, int firerate){
         super(icon, damage);
         this.firerate = firerate;
+        weptype = "shotgun";
     }
 
     @Override
@@ -23,9 +24,15 @@ public class Shotgun extends Weapon  {
     @Override
     public ArrayList<Bullet> shoot(double x, double y, double ang, ArrayList<Bullet> allbuls, BufferedImage pic){
         for(int i = -2; i <= 2; i ++) {
-            allbuls.add(new Bullet(x, y, ang + Math.toRadians(i * 5), pic, 1));
+            allbuls.add(new Bullet(x, y, ang + Math.toRadians(i * 5), pic, 1,1,10));
             System.out.println("shoot");
         }
         return allbuls;
     }
+
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
 }

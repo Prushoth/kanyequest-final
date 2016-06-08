@@ -24,7 +24,7 @@ public class Paparazzi extends Enemy {
         speed = 2;
     }
 
-    public void draw(Graphics g, KanyePanel k, int[] offset, boolean offscreen, BufferedImage[] sprites){
+    public void draw(Graphics g, KanyePanel k, int[] offset, boolean offscreen, BufferedImage[] sprites, double px, double py){
 
         double screenx = coords[0] + offset[0]; //position of object relative to screen, not map
         double screeny = coords[1] + offset[1];
@@ -54,6 +54,39 @@ public class Paparazzi extends Enemy {
         else{ //no need to waste time drawing the object if its offscreen
             //how to draw line at edge of screen closes to obj??
             //g.drawLine(1000, 500, (int)Math.round(1 * Math.cos(ang)), (int)Math.round(1 * Math.sin(ang)));
+            double newx,newy;
+            double newang = Math.atan2(py-coords[1], px- coords[0]);
+            if (newang> Math.toRadians(45) && newang< Math.toRadians(135) || newang> Math.toRadians(225) && newang< Math.toRadians(315)){
+                if(px > coords[0]){
+                    newx= px- coords[0] -px/coords[1]-py * (py-10);
+                }
+                else{
+                    newx= px +coords[0] -px/coords[1]-py * (py-10);
+                }
+                if ( newang> Math.toRadians(225) && newang< Math.toRadians(315)) {
+                    newy = 990;
+                }
+                else{
+                    newy = 10;
+                }
+            }
+            else{
+                if(py > coords[1]){
+                    newx= px- coords[0] -px/coords[1]-py * (py-10);
+                }
+                else{
+                    newx= px +coords[0] -px/coords[1]-py * (py-10);
+                }
+                if ( newang> Math.toRadians(225) && newang< Math.toRadians(315)) {
+                    newy = 990;
+                }
+                else{
+                    newy = 10;
+                }
+            }
+
+
+
         }
         g.setColor(new Color(34, 139, 34));
         g.fillRect((int)screenx - 50,(int)screeny - 40, hp, 10); //hp

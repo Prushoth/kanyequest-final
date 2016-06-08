@@ -13,10 +13,11 @@ public class Kanye{
     private double ang;
     private BufferedImage[] sprites;
     private Weapon curwep;
-
+    private Laser laser;
     private int speed, hp;
     private boolean shooting;
     private boolean invincible;
+    private Powerup[] powerupList;
 
     private Powerup speedBoost, hpBoost;
 
@@ -27,6 +28,11 @@ public class Kanye{
         coords[1] = y;
         speed = 5;
         hp = 100;
+        powerupList =  new Powerup[2];
+        for (int i = 0;i <2; i++){
+            powerupList[i] = null;
+        }
+        laser = new Laser(x+20,y+60,ang);
     }
 
     public void setShooting(boolean s){
@@ -86,6 +92,8 @@ public class Kanye{
         coords[0] += displacedx * speed;
         coords[1] += displacedy * speed;
     }
+    public Laser getLaser(){return laser;}
+
     public void updatePlayer(){
         if(speedBoost != null){
             speedBoost.update();
@@ -108,18 +116,38 @@ public class Kanye{
             System.exit(0);
         }
     }
-    public void draw(Graphics g, KanyePanel k, int[] offset){
+    public void draw(Graphics g, KanyePanel k, int[] offset, BufferedImage chainsawpic){
 
         //is there a way to simplify this shit
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
         g2d.translate(coords[0] + offset[0], coords[1] + offset[1]); //move graphics2d object to center of image
-        g2d.rotate(ang ); //rotate around the center of image
-        g2d.drawImage(sprites[1], -40, -40, null); //codords are top left of image, gun sticks out 42 pixels
+        g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
+        g2d.drawImage(sprites[1], -40, -82,k); //codords are top left of image, gun sticks out 42 pixels
+        if (curwep.getName().equals("chainsaw")){
+            g2d.drawImage(chainsawpic, -40, -82, k);
+        }
         g2d.setTransform(oldAT); //reset
 
         //g.drawImage(sprite, (int)Math.round(coords[0]) - 40, (int)Math.round(coords[1]) - 40, k);
         g.setColor(Color.blue);
         g.fillRect(10, 10, hp*3, 10);
+
+    }
+    public void drawLaser(Graphics g, double ex, double ey , boolean tf) {
+        if (curwep.getName().equals("laserbeam")) {
+
+            if (!tf) {
+
+                g.drawLine((int) coords[0], (int) coords[1], (int) (coords[0] + 500 * Math.pow(13, .5) * Math.cos(ang)), (int) (coords[1] + 500 * Math.pow(13, .5) * Math.sin(ang)));
+                System.out.println(false);
+            }
+            else {
+
+                g.drawLine((int) coords[0], (int) coords[1], (int) ex, (int) ey);
+            }
+
+        }
+
     }
 }

@@ -12,24 +12,45 @@ public class Bullet {
     private final int FLAME = 2;
     private final int ROCKET = 3;
 
-    private double ang, speed;
+
+    private double ang;
     private double[] coords = new double[2];
     private BufferedImage sprite;
     private Ellipse2D bounds; //change later to image collision
-    private int bulletType;
-
-    public Bullet(double x, double y, double ang, BufferedImage sprite, int bultype){
+    private int bulletType, speed;
+    private double accel;
+    private boolean movingLeft;
+    public Bullet(double x, double y, double ang, BufferedImage sprite, int bultype, double accel, int speed ){
         coords[0] = x;
         coords[1] = y;
         this.ang = ang;
         this.sprite = sprite;
         bulletType = bultype;
-        speed = 10;
+        this.speed= speed;
+        this.accel = accel;
+        movingLeft = false;
+
+
 
     }
+    public void setDirection(boolean tf){
+        movingLeft = tf;
+    }
+    public int getType(){
+        return bulletType;
+    }
+
     public void move(){
-        if(bulletType == FLAME){
-            speed *= 0.8;
+        if (bulletType == FLAME){
+
+           if (movingLeft ){
+               ang *= -1.00001;
+           }
+
+           else{
+               ang *= 1.00001;
+           }
+
         }
         coords[0] += speed * Math.cos(ang);
         coords[1] += speed * Math.sin(ang);
