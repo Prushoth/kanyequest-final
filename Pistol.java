@@ -27,5 +27,11 @@ public class Pistol extends Weapon{
         return firerate;
     }
 
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
+
 
 }

@@ -11,18 +11,30 @@ public class Flamethrower extends Weapon {
     private int range;
     private Random rn = new Random();
     private String weptype;
-    public Flamethrower(BufferedImage icon, int damage, int range){
+    private int firerate;
+    public Flamethrower(BufferedImage icon, int damage, int range, int firerate){
         super(icon, damage);
         this.range = range;
         weptype = "flamethrower";
+        this.firerate = firerate;
+
+
 
     }
     @Override
     public ArrayList<Bullet> shoot(double x, double y, double ang, ArrayList<Bullet> allbuls, BufferedImage pic){
-        for(int i = 0; i< 50; i++){
-            int randP = rn.nextInt(120)- 60;
-            int randSpeed = rn.nextInt(15);
-            Bullet b = new Bullet(x,y , ang+ (double)randP, pic, 2, 0.8, randSpeed);
+        for(int i = 0; i< 2; i++) {
+            //double randP =  Math.PI/6* (rn.nextDouble()*2 -1);
+            // /min + (interval)*random23 * Math.PI / 12 + (Math.PI / 12)/
+            double randP = -Math.PI/6 + ( Math.PI/3) *(rn.nextDouble());
+
+            int randSpeed = rn.nextInt(30) + 10;
+            Bullet b = new Bullet(x, y, ang + randP, pic, 2, 1, randSpeed);
+            if (randP >0) {
+
+                b.setDirection(true);
+            }
+
             allbuls.add(b);
         }
         return allbuls;
@@ -30,7 +42,13 @@ public class Flamethrower extends Weapon {
 
     @Override
     public int getFirerate() {
-        return 0;
+        return firerate;
     }
+
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
 
 }

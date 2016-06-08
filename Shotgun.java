@@ -29,4 +29,10 @@ public class Shotgun extends Weapon  {
         }
         return allbuls;
     }
+
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
 }

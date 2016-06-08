@@ -33,4 +33,10 @@ public class AssaultRifle extends Weapon {
         allbuls.add(new Bullet(x, y , ang, pic, 1,1,10));
         return allbuls;
     }
+
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
 }

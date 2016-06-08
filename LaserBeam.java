@@ -10,20 +10,26 @@ import java.awt.*;
 import java.awt.geom.*;
 public class LaserBeam extends Weapon {
     private String weptype;
+    private Laser laser;
     public LaserBeam(BufferedImage sprite, int damage){
         super(sprite, damage);
         weptype = "laserbeam";
+
+
     }
     @Override
-    public ArrayList<Bullet> shoot(double x,double y, double ang, ArrayList<Bullet> allbuls, BufferedImage bulpic){
-        Bullet b = new Bullet(x,y, ang, bulpic, 4, 2,20);
-
-        allbuls.add(b);
-        return allbuls;
-
-    }
+    public ArrayList<Bullet> shoot(double x,double y, double ang, ArrayList<Bullet> allbuls, BufferedImage bulpic){return allbuls;}
     @Override
     public int getFirerate(){
         return 0;
     }
+
+
+    @Override
+    public String getName(){
+        return weptype;
+    }
+
+
+
 }
