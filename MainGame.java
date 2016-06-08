@@ -65,21 +65,25 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
     private Weapon[] allweps;
 
 	private ArrayList<Bullet> bullets= new ArrayList<Bullet>();
-    private ArrayList<Fans> fans= new ArrayList<Fans>();
+    private ArrayList<Fan> fans = new ArrayList<Fan>();
     private ArrayList<TripMine> tripmines = new ArrayList<TripMine>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
     private ArrayList<Paparazzi> paparazzi = new ArrayList<Paparazzi>();
     private ArrayList<Van> vanList = new ArrayList<Van>();
     private ArrayList<Powerup> powerList = new ArrayList<Powerup>();
 
-	private MainGame mainFrame;
+    private BufferedImage[] kanyepics;
+    private BufferedImage[] enemyPics;
+    private BufferedImage map, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic, mapmask;
+
+    private MainGame mainFrame;
     private Random rn = new Random();
 	private Kanye player;
-	private int mx , my, bullcounter, mainCounter;
+
+	private int mx , my, mainCounter, shootCounter;
 	private double ang;
 
-    private BufferedImage map, fanpic, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic, mapmask;
-    private BufferedImage[] kanyepics;
+
 
     private boolean edge;
 
@@ -93,17 +97,17 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         keys = new boolean[KeyEvent.KEY_LAST+1];
         offset = new int[]{0, 0};
         displacement = offset;
-        bullcounter = 25; //default weapon's firerate is 25
         mainCounter = 0;
+        shootCounter = 0;
         edge = false;
 
         try{
             map  = ImageIO.read(new File("resources/images/map.jpg"));
             mapsize = new int[]{map.getWidth(), map.getHeight()};
             System.out.println("1");
-            fanpic =  ImageIO.read(new File("resources/images/enemy.png"));
+            enemyPics = new BufferedImage[]{ImageIO.read(new File("resources/images/sprites/enemysprites/backpackguy.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/brownguy.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/greengirl.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/paparazziwalking.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/paparazzitakingpic.png"))};
             bulletpic = ImageIO.read(new File("resources/images/bullet.png"));
-            kanyepics = new BufferedImage[]{ImageIO.read(new File("resources/images/playersprites/leftboot.png")), ImageIO.read(new File("resources/images/playersprites/middle.png")), ImageIO.read(new File("resources/images/playersprites/rightboot.png"))};
+            kanyepics = new BufferedImage[]{ImageIO.read(new File("resources/images/sprites/playersprites/holdinggun.png")), ImageIO.read(new File("resources/images/sprites/playersprites/shooting1.png")), ImageIO.read(new File("resources/images/sprites/playersprites/gunflameithink.png"))};
             System.out.println("2");
             allweps = new Weapon[]{new AssaultRifle(ImageIO.read(new File("resources/images/m4a4.png")), 10, 3, 20), new Shotgun(ImageIO.read(new File("resources/images/m4a4.png")), 25, 85)};
             trippic = ImageIO.read(new File("resources/images/tripmine.png"));
@@ -235,47 +239,40 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         //System.out.println(my - (player.getY() + offset[XVAL]) + " " + (mx - (player.getX() + offset[YVAL])));
         player.updatePlayer();
         mainCounter ++;
-        bullcounter ++;
         if(mainCounter++ == Integer.MAX_VALUE){ //integer will not overflow if game runs too long
             mainCounter = 0;
         }
-        if(bullcounter++ == Integer.MAX_VALUE){
-            bullcounter = 0;
+        shootCounter ++;
+        if(shootCounter++ == Integer.MAX_VALUE){ //integer will not overflow if game runs too long
+            shootCounter = 0;
         }
 
         //region SPAWNING OBJECTS
-        if(mainCounter % 200 == 0){ //tries spawning new powerup at a set interval
-            int randP = rn.nextInt(2);
+        if(mainCounter % 200 == 0 && powerList.size() < 5){ //tries spawning new powerup at a set interval, avoids spawning too man
+            int choice = rn.nextInt(2);
+
             int[] randpos = getValidPoints();
-            if (randP == 0) {
-                powerList.add(new Yeezys(randpos[XVAL], randpos[YVAL], yeezypic));
-            }
-            else if(randP == 1){
-                powerList.add(new Vest(randpos[XVAL], randpos[YVAL], vestpic));
-            }
+            powerList.add(new Powerup(new String[]{"yeezys", "vest"}[choice], randpos[XVAL], randpos[YVAL], 4000, new BufferedImage[]{yeezypic, vestpic}[choice]));
         }
 
-		if(player.isShooting()){
-            //System.out.println("true");
-			if(bullcounter >= player.getWep().getFirerate()){
-                System.out.println("shoot");
-                //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
-                bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
-				bullcounter = 0;
-			}
+		if(player.isShooting() && shootCounter - player.getWep().getFirerate() >= 0){
+            System.out.println("shoot");
+            //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
+            bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
+            shootCounter = 0;
 		}
 
-        if (fans.size() == 0) { //code for testing only
+        if(fans.size() == 0) { //code for testing only
             for (int i  = 0; i < 10; i++) {
                 int[] spawnpos = getValidPoints();
-                fans.add(new Fans(spawnpos[XVAL], spawnpos[YVAL], 50, 50, fanpic));
+                fans.add(new Fan(spawnpos[XVAL], spawnpos[YVAL], 50, 50, enemyPics[rn.nextInt(3)]));
             }
         }
 
         if(vanList.size() == 0){
             int[] vanpos = getValidPoints();
             vanList.add(new Van(vanpos[XVAL], vanpos[YVAL], vanpic));
-            paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, fanpic, vanList.get(0)));
+            paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, vanList.get(0)));
         }
         //endregion
 
@@ -283,7 +280,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         //region COLLISION DETECTION BETWEEN OBJECTS
         for (Iterator<Powerup> powerupIterator = powerList.iterator(); powerupIterator.hasNext();){
             Powerup p = powerupIterator.next();
-            if (player.collide(p.getX(), p.getY(), 30)){
+            if(player.collide(p.getX(), p.getY(), 30)){
                 player.pickup(p);
                 powerupIterator.remove();
                 System.out.println("picked up");
@@ -292,8 +289,8 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (Iterator<TripMine> mineiter = tripmines.iterator(); mineiter.hasNext(); ) {
             TripMine t = mineiter.next();
-            for(Fans e : fans){
-                if(e.collide(t.getX(), t.getY(), 40)){
+            for(Fan e : fans){
+                if(e.collide(t.getX(), t.getY(), 50)){
                     explosions.add(t.blowUP());
                     mineiter.remove();
                 }
@@ -338,9 +335,8 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             exploiter.remove();
         }
 
-        for(Iterator<Fans> faniter = fans.iterator();  faniter.hasNext();) {
-            Fans tmpf  = faniter.next();
-
+        for(Iterator<Fan> faniter = fans.iterator();  faniter.hasNext();) {
+            Fan tmpf  = faniter.next();
 
             tmpf.move(player, fans, paparazzi);
 
@@ -357,7 +353,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
                 pappIter.remove();
                 for (int i  = 0; i < 10; i++) {
                     int[] tmppos = getValidPoints();
-                    fans.add(new Fans(tmppos[XVAL], tmppos[YVAL], 50, 50, fanpic));
+                    fans.add(new Fan(tmppos[XVAL], tmppos[YVAL], 50, 50, enemyPics[rn.nextInt(3)]));
                 }
             }
 
@@ -399,7 +395,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
 		}
 
-        for(Fans e: fans ){
+        for(Fan e: fans ){
             if(!isOffscreen(e.getX(), e.getY())){
                 e.draw(g, this, offset);
             }
@@ -407,16 +403,16 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (TripMine t : tripmines){
             if(!isOffscreen(t.getX(), t.getY())){
-                t.draw(g, this);
+                t.draw(g, this, offset);
             }
         }
 
         for (Paparazzi p: paparazzi){
             if(isOffscreen(p.getX(), p.getY())){ //arrow will point to enemy if offscreen
-                p.draw(g, this, offset, false);
+                p.draw(g, this, offset, false, enemyPics);
             }
             else{
-                p.draw(g, this, offset, false);
+                p.draw(g, this, offset, false, enemyPics);
             }
 
         }
