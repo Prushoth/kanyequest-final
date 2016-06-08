@@ -19,11 +19,11 @@ public class Kanye{
     private boolean invincible;
     private Powerup[] powerupList;
 
-    public Kanye(double x, double y, BufferedImage[] pics, Weapon curwep){
+    private Powerup speedBoost, hpBoost;
 
+    public Kanye(double x, double y, BufferedImage[] pics, Weapon curwep){
         this.curwep = curwep;
         sprites = pics;
-
         coords[0] = x;
         coords[1] = y;
         speed = 5;
@@ -33,7 +33,6 @@ public class Kanye{
             powerupList[i] = null;
         }
         laser = new Laser(x+20,y+60,ang);
-
     }
 
     public void setShooting(boolean s){
@@ -42,15 +41,18 @@ public class Kanye{
 
     public boolean isShooting(){return shooting;}
 
-    public Powerup[] getPowerupList(){return powerupList;}
-
     public boolean collide(double x, double y, int dist){
         return(Math.hypot(coords[0]  - x, coords[1]  - y) < dist);
 
     }
 
-    public void pickup(Powerup p){
-        powerupList[p.getNum()] =p;
+    public void pickup(Powerup newp){
+        if(newp.isType("yeezys")){
+            speedBoost = newp;
+            return;
+        }
+        hpBoost = newp;
+
     }
 
     public int getHP(){
@@ -73,12 +75,12 @@ public class Kanye{
     public void changeAng(double a){ang = a; }
 
     public void changeHP(int n ){
-        if (n< 0){
-            if (powerupList[1]!= null){
-                hp+=n+2;
-            }
-            hp+=n;
+        System.out.println("hit " + n);
+        if (n < 0 && hpBoost != null){
+            n /= 2;
+            System.out.println("reduced" + n/2);
         }
+        
         hp += n;
         System.out.println(hp);
         hp = (hp < 0) ? 0 : hp;
@@ -93,13 +95,21 @@ public class Kanye{
     public Laser getLaser(){return laser;}
 
     public void updatePlayer(){
-        for (int i = 0; i <2; i++){
-            if (powerupList[i] != null && powerupList[i].getFinish()){
-                powerupList[i] = null;
+        if(speedBoost != null){
+            speedBoost.update();
+            if(speedBoost.ranOut()){
+                speedBoost = null;
             }
         }
 
-        speed = powerupList[0] == null ? 5 : 7;
+        if(hpBoost != null){
+            hpBoost.update();
+            if(hpBoost.ranOut()){
+                hpBoost = null;
+            }
+        }
+
+        speed = speedBoost == null ? 5 : 7;
 
         if(hp <= 0){
             System.out.println("DEAD DEAD DEAD DEAD U SUCK DEAD DEAD DEAD DEAD");

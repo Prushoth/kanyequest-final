@@ -14,8 +14,8 @@ public class Paparazzi extends Enemy {
     private Van home;
     private int capturetime, speed;
 
-    public Paparazzi(double x, double y, int hp, BufferedImage sprite, Van home) {
-        super(x, y, hp, sprite);
+    public Paparazzi(double x, double y, int hp, Van home) {
+        super(x, y, hp);
         coords[0] = x;
         coords[1] = y;
         this.home = home;
@@ -24,7 +24,7 @@ public class Paparazzi extends Enemy {
         speed = 2;
     }
 
-    public void draw(Graphics g, KanyePanel k, int[] offset, boolean offscreen){
+    public void draw(Graphics g, KanyePanel k, int[] offset, boolean offscreen, BufferedImage[] sprites, double px, double py){
 
         double screenx = coords[0] + offset[0]; //position of object relative to screen, not map
         double screeny = coords[1] + offset[1];
@@ -33,12 +33,12 @@ public class Paparazzi extends Enemy {
             Graphics2D g2d = (Graphics2D) g;
             AffineTransform oldAT = g2d.getTransform(); //save default transformations
             g2d.translate(screenx, screeny); //move graphics2d object to center of image
-            g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
-            if(capturetime != 0){
-                g2d.drawImage(sprite, -30, -30, null); //change sprite to sprite of taking picture
+            g2d.rotate(ang); //rotate around the center of image
+            if(capturing){
+                g2d.drawImage(sprites[4], -30, -30, null); //change sprite to sprite of taking picture
             }
             else{
-                g2d.drawImage(sprite, -30, -30, null); //coords are top left of image
+                g2d.drawImage(sprites[3], -30, -30, null); //coords are top left of image
             }
 
             g2d.setTransform(oldAT); //reset
@@ -54,6 +54,39 @@ public class Paparazzi extends Enemy {
         else{ //no need to waste time drawing the object if its offscreen
             //how to draw line at edge of screen closes to obj??
             //g.drawLine(1000, 500, (int)Math.round(1 * Math.cos(ang)), (int)Math.round(1 * Math.sin(ang)));
+            double newx,newy;
+            double newang = Math.atan2(py-coords[1], px- coords[0]);
+            if (newang> Math.toRadians(45) && newang< Math.toRadians(135) || newang> Math.toRadians(225) && newang< Math.toRadians(315)){
+                if(px > coords[0]){
+                    newx= px- coords[0] -px/coords[1]-py * (py-10);
+                }
+                else{
+                    newx= px +coords[0] -px/coords[1]-py * (py-10);
+                }
+                if ( newang> Math.toRadians(225) && newang< Math.toRadians(315)) {
+                    newy = 990;
+                }
+                else{
+                    newy = 10;
+                }
+            }
+            else{
+                if(py > coords[1]){
+                    newx= px- coords[0] -px/coords[1]-py * (py-10);
+                }
+                else{
+                    newx= px +coords[0] -px/coords[1]-py * (py-10);
+                }
+                if ( newang> Math.toRadians(225) && newang< Math.toRadians(315)) {
+                    newy = 990;
+                }
+                else{
+                    newy = 10;
+                }
+            }
+
+
+
         }
         g.setColor(new Color(34, 139, 34));
         g.fillRect((int)screenx - 50,(int)screeny - 40, hp, 10); //hp
@@ -66,9 +99,15 @@ public class Paparazzi extends Enemy {
         }
         return false;
     }
+    @Override
+    public void changeHP(int n){
+        if(!capturing){
+            hp += n;
+        }
+    }
 
 
-    public void move(Kanye k, ArrayList<Paparazzi> plist, ArrayList<Fans> flist){
+    public void move(Kanye k, ArrayList<Paparazzi> plist, ArrayList<Fan> flist){
         //moving towards player
         double dx = k.getX() - coords[0];
         double dy = k.getY() - coords[1];
@@ -98,7 +137,7 @@ public class Paparazzi extends Enemy {
             }
         }
 
-        for (Fans f : flist) {
+        for (Fan f : flist) {
             dx = coords[0] - f.getX(); //delta x, total horizontal distance
             dy = coords[1] - f.getY(); //delta y, total vertical distance
             dist = Math.max(1, Math.hypot(dx, dy));

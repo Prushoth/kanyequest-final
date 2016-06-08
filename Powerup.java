@@ -7,26 +7,31 @@ import java.util.*;
 import java.awt.*;
 import java.awt.geom.*;
 
-public abstract class Powerup {
-    public int counter;
+public class Powerup {
+    public String type;
+    public int duration, durationLeft;
     public double x, y;
     public BufferedImage sprite;
-    public boolean finish;
-    public Powerup(double x, double y, BufferedImage sprite){
+    public boolean finished;
+
+    public Powerup(String type, double x, double y, int duration, BufferedImage sprite){
+        this.type = type;
         this.x = x;
         this.y = y;
         this.sprite = sprite;
-        finish = false;
+        this.duration = duration;
+        durationLeft = duration;
+        finished = false;
     }
-    public void countdown(){
-        counter --;
-        if (counter <= 0){
-            finish = true;
+    public void update(){
+        durationLeft --;
+        if(durationLeft <= 0){
+            finished = true;
         }
     }
 
-    public boolean getFinish() {
-        return finish;
+    public boolean ranOut(){
+        return finished;
     }
 
     public boolean collide(double px, double py, int dist){
@@ -46,9 +51,16 @@ public abstract class Powerup {
         y += dy;
     }
 
-    public void effect(Kanye k){}
+    public String getType(){
+        return type;
+    }
 
-    public abstract int getNum();
+    public boolean isType(String name){
+        if(name.equals(type)){
+            return true;
+        }
+        return false;
+    }
 
     public void draw(Graphics g, KanyePanel k, int[] offset){
         g.drawImage(sprite, (int)Math.round(x + offset[0]),(int)Math.round(y + offset[1]), k);

@@ -12,15 +12,13 @@ public abstract class Enemy {
     public double[] coords = new double[2];
     public double ang;
     public int hp, atkcounter;
-    public BufferedImage sprite;
 
-    public Enemy(double x, double y, int hp, BufferedImage sprite){
+    public Enemy(double x, double y, int hp){
         coords[0] = x;
         coords[1] = y;
         this.hp = hp;
         ang = 0;
         atkcounter = 50;
-        this.sprite = sprite;
 
     }
     public double getX(){
