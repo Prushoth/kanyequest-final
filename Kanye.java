@@ -17,20 +17,16 @@ public class Kanye{
     private int speed, hp;
     private boolean shooting;
     private boolean invincible;
-    private Powerup[] powerupList;
-    public Kanye(double x, double y, BufferedImage[] pics, Weapon curwep){
 
+    private Powerup speedBoost, hpBoost;
+
+    public Kanye(double x, double y, BufferedImage[] pics, Weapon curwep){
         this.curwep = curwep;
         sprites = pics;
-
         coords[0] = x;
         coords[1] = y;
         speed = 5;
         hp = 100;
-        powerupList =  new Powerup[2];
-        for (int i = 0;i <2; i++){
-            powerupList[i] = null;
-        }
     }
 
     public void setShooting(boolean s){
@@ -39,15 +35,18 @@ public class Kanye{
 
     public boolean isShooting(){return shooting;}
 
-    public Powerup[] getPowerupList(){return powerupList;}
-
     public boolean collide(double x, double y, int dist){
         return(Math.hypot(coords[0]  - x, coords[1]  - y) < dist);
 
     }
 
-    public void pickup(Powerup p){
-        powerupList[p.getNum()] =p;
+    public void pickup(Powerup newp){
+        if(newp.isType("yeezys")){
+            speedBoost = newp;
+            return;
+        }
+        hpBoost = newp;
+
     }
 
     public int getHP(){
@@ -70,12 +69,12 @@ public class Kanye{
     public void changeAng(double a){ang = a; }
 
     public void changeHP(int n ){
-        if (n< 0){
-            if (powerupList[1]!= null){
-                hp+=n+2;
-            }
-            hp+=n;
+        System.out.println("hit " + n);
+        if (n < 0 && hpBoost != null){
+            n /= 2;
+            System.out.println("reduced" + n/2);
         }
+        
         hp += n;
         System.out.println(hp);
         hp = (hp < 0) ? 0 : hp;
@@ -83,32 +82,40 @@ public class Kanye{
     }
 
     public void move(double displacedx, double displacedy){
-        System.out.println("moving" + displacedx + " " + displacedy);
+        //System.out.println("moving" + displacedx + " " + displacedy);
         coords[0] += displacedx * speed;
         coords[1] += displacedy * speed;
     }
     public void updatePlayer(){
-        for (int i = 0; i <2; i++){
-            if (powerupList[i] != null && powerupList[i].getFinish()){
-                powerupList[i] = null;
+        if(speedBoost != null){
+            speedBoost.update();
+            if(speedBoost.ranOut()){
+                speedBoost = null;
             }
         }
 
-        speed = powerupList[0] == null ? 5 : 7;
+        if(hpBoost != null){
+            hpBoost.update();
+            if(hpBoost.ranOut()){
+                hpBoost = null;
+            }
+        }
+
+        speed = speedBoost == null ? 5 : 7;
 
         if(hp <= 0){
             System.out.println("DEAD DEAD DEAD DEAD U SUCK DEAD DEAD DEAD DEAD");
             System.exit(0);
         }
     }
-    public void draw(Graphics g, KanyePanel k){
+    public void draw(Graphics g, KanyePanel k, int[] offset){
 
         //is there a way to simplify this shit
         Graphics2D g2d = (Graphics2D) g;
         AffineTransform oldAT = g2d.getTransform(); //save default transformations
-        g2d.translate(coords[0], coords[1]); //move graphics2d object to center of image
-        g2d.rotate(ang + Math.toRadians(90)); //rotate around the center of image
-        g2d.drawImage(sprites[1], -40, -82, null); //codords are top left of image, gun sticks out 42 pixels
+        g2d.translate(coords[0] + offset[0], coords[1] + offset[1]); //move graphics2d object to center of image
+        g2d.rotate(ang ); //rotate around the center of image
+        g2d.drawImage(sprites[1], -40, -40, null); //codords are top left of image, gun sticks out 42 pixels
         g2d.setTransform(oldAT); //reset
 
         //g.drawImage(sprite, (int)Math.round(coords[0]) - 40, (int)Math.round(coords[1]) - 40, k);

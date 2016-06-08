@@ -65,21 +65,25 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
     private Weapon[] allweps;
 
 	private ArrayList<Bullet> bullets= new ArrayList<Bullet>();
-    private ArrayList<Fans> fans= new ArrayList<Fans>();
+    private ArrayList<Fan> fans = new ArrayList<Fan>();
     private ArrayList<TripMine> tripmines = new ArrayList<TripMine>();
     private ArrayList<Explosion> explosions = new ArrayList<Explosion>();
     private ArrayList<Paparazzi> paparazzi = new ArrayList<Paparazzi>();
     private ArrayList<Van> vanList = new ArrayList<Van>();
     private ArrayList<Powerup> powerList = new ArrayList<Powerup>();
 
-	private MainGame mainFrame;
+    private BufferedImage[] kanyepics;
+    private BufferedImage[] enemyPics;
+    private BufferedImage map, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic, mapmask;
+
+    private MainGame mainFrame;
     private Random rn = new Random();
 	private Kanye player;
-	private int mx , my, bullcounter, mainCounter;
+
+	private int mx , my, mainCounter, shootCounter;
 	private double ang;
 
-    private BufferedImage map, fanpic, bulletpic, sprite, lefttest, righttest, midtest, trippic, vanpic, yeezypic, vestpic;
-    private BufferedImage[] kanyepics;
+
 
     private boolean edge;
 
@@ -93,17 +97,17 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         keys = new boolean[KeyEvent.KEY_LAST+1];
         offset = new int[]{0, 0};
         displacement = offset;
-        bullcounter = 25; //default weapon's firerate is 25
         mainCounter = 0;
+        shootCounter = 0;
         edge = false;
 
         try{
             map  = ImageIO.read(new File("resources/images/map.jpg"));
             mapsize = new int[]{map.getWidth(), map.getHeight()};
             System.out.println("1");
-            fanpic =  ImageIO.read(new File("resources/images/enemy.png"));
+            enemyPics = new BufferedImage[]{ImageIO.read(new File("resources/images/sprites/enemysprites/backpackguy.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/brownguy.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/greengirl.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/paparazziwalking.png")), ImageIO.read(new File("resources/images/sprites/enemysprites/paparazzitakingpic.png"))};
             bulletpic = ImageIO.read(new File("resources/images/bullet.png"));
-            kanyepics = new BufferedImage[]{ImageIO.read(new File("resources/images/playersprites/leftboot.png")), ImageIO.read(new File("resources/images/playersprites/middle.png")), ImageIO.read(new File("resources/images/playersprites/rightboot.png"))};
+            kanyepics = new BufferedImage[]{ImageIO.read(new File("resources/images/sprites/playersprites/holdinggun.png")), ImageIO.read(new File("resources/images/sprites/playersprites/shooting1.png")), ImageIO.read(new File("resources/images/sprites/playersprites/gunflameithink.png"))};
             System.out.println("2");
             allweps = new Weapon[]{new AssaultRifle(ImageIO.read(new File("resources/images/m4a4.png")), 10, 3, 20), new Shotgun(ImageIO.read(new File("resources/images/m4a4.png")), 25, 85)};
             trippic = ImageIO.read(new File("resources/images/tripmine.png"));
@@ -160,14 +164,13 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         player.changeAng(Math.atan2(my - (player.getY() + offset[YVAL]), mx - (player.getX() + offset[XVAL])));
 	}
 
-    //redesign player movement system to make sure that the player's coordinates are not relative to the screen but relative to the map
     //requires two lists; one of players coords on screen and player coords on map??
     public void move(){
         if(keys[KeyEvent.VK_D]){ //strafe right
             if(player.getX() + offset[0] <= 1460){
                 player.move(1, 0);
             }
-            else if(offset[XVAL] >= -mapsize[XVAL]) {
+            else if(offset[XVAL] >= -mapsize[XVAL] + 1500) {
                 edge = true;
                 player.move(1, 0);
                 offset[XVAL] -= player.getSpeed();
@@ -197,13 +200,14 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             }
         }
         if(keys[KeyEvent.VK_S]){ //move DOWN
-            System.out.println(player.getX() + offset[0] + " " + (player.getY() + offset[1]));
+            //System.out.println(player.getX() + offset[0] + " " + (player.getY() + offset[1]));
             if(player.getY() + offset[YVAL] <= 920){
-                //System.out.println("shift");
+                //System.out.println("down");
                 player.move(0, 1);
             }
-            else if(offset[YVAL] >= -mapsize[YVAL]){
-                edge = true;
+            else if(offset[YVAL] >= -mapsize[YVAL] + 1000){
+                //System.out.println("not down");
+                //System.out.println(player.getY() + offset[YVAL]);
                 player.move(0, 1);
                 offset[YVAL] -= player.getSpeed();
                 displacement[YVAL] = -1;
@@ -235,40 +239,40 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         //System.out.println(my - (player.getY() + offset[XVAL]) + " " + (mx - (player.getX() + offset[YVAL])));
         player.updatePlayer();
         mainCounter ++;
-        bullcounter ++;
-
-        //region SPAWNING OBJECTS
-        if(mainCounter % 200 == 0){ //tries spawning new powerup at a set interval
-            int randP = rn.nextInt(2);
-            int[] randpos = getValidPoint();
-            if (randP == 0) {
-                powerList.add(new Yeezys(randpos[XVAL], randpos[YVAL], yeezypic));
-            }
-            else if(randP == 1){
-                powerList.add(new Vest(randpos[XVAL], randpos[YVAL], vestpic));
-            }
+        if(mainCounter++ == Integer.MAX_VALUE){ //integer will not overflow if game runs too long
+            mainCounter = 0;
+        }
+        shootCounter ++;
+        if(shootCounter++ == Integer.MAX_VALUE){ //integer will not overflow if game runs too long
+            shootCounter = 0;
         }
 
-		if(player.isShooting()){
-            //System.out.println("true");
-			if(bullcounter >= player.getWep().getFirerate()){
-                //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
-                bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
-				bullcounter = 0;
-			}
+        //region SPAWNING OBJECTS
+        if(mainCounter % 200 == 0 && powerList.size() < 5){ //tries spawning new powerup at a set interval, avoids spawning too man
+            int choice = rn.nextInt(2);
+
+            int[] randpos = getValidPoints();
+            powerList.add(new Powerup(new String[]{"yeezys", "vest"}[choice], randpos[XVAL], randpos[YVAL], 4000, new BufferedImage[]{yeezypic, vestpic}[choice]));
+        }
+
+		if(player.isShooting() && shootCounter - player.getWep().getFirerate() >= 0){
+            System.out.println("shoot");
+            //GET BULLETS TO COME OUT OF GUN, REQUIRES SLIGHT OFFSET
+            bullets = player.getWep().shoot(player.getX(), player.getY(), player.getAng(), bullets, bulletpic);
+            shootCounter = 0;
 		}
 
-        if (fans.size() == 0) { //code for testing only
+        if(fans.size() == 0) { //code for testing only
             for (int i  = 0; i < 10; i++) {
-                fans.add(new Fans(200, 200, 50, 50, fanpic));
+                int[] spawnpos = getValidPoints();
+                fans.add(new Fan(spawnpos[XVAL], spawnpos[YVAL], 50, 50, enemyPics[rn.nextInt(3)]));
             }
         }
 
         if(vanList.size() == 0){
-            int[] vanpos = getValidPoint();
+            int[] vanpos = getValidPoints();
             vanList.add(new Van(vanpos[XVAL], vanpos[YVAL], vanpic));
-            paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, fanpic, vanList.get(0)));
-            paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, fanpic, vanList.get(0)));
+            paparazzi.add(new Paparazzi(vanpos[XVAL], vanpos[YVAL], 50, vanList.get(0)));
         }
         //endregion
 
@@ -276,7 +280,7 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
         //region COLLISION DETECTION BETWEEN OBJECTS
         for (Iterator<Powerup> powerupIterator = powerList.iterator(); powerupIterator.hasNext();){
             Powerup p = powerupIterator.next();
-            if (player.collide(p.getX(), p.getY(), 30)){
+            if(player.collide(p.getX(), p.getY(), 30)){
                 player.pickup(p);
                 powerupIterator.remove();
                 System.out.println("picked up");
@@ -285,14 +289,11 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
         for (Iterator<TripMine> mineiter = tripmines.iterator(); mineiter.hasNext(); ) {
             TripMine t = mineiter.next();
-            for(Fans e : fans){
-                if(e.collide(t.getX(), t.getY(), 40)){
+            for(Fan e : fans){
+                if(e.collide(t.getX(), t.getY(), 50)){
                     explosions.add(t.blowUP());
                     mineiter.remove();
                 }
-            }
-            if(edge){
-                t.changePos(displacement[XVAL] * player.getSpeed(), displacement[YVAL] * player.getSpeed());
             }
         }
 
@@ -303,13 +304,14 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 
             for(Enemy e : fans){//.addAll(paparazzi)){
                 if(e.collide(b.getX(), b.getY(), 35)){
+                    System.out.println("hit");
                     e.changeHP(-player.getWep().getDamage());
                     remove = true;
                 }
             }
-            for(Enemy e : paparazzi){//.addAll(paparazzi)){
-                if(e.collide(b.getX(), b.getY(), 35)){
-                    e.changeHP(-player.getWep().getDamage());
+            for(Enemy p : paparazzi){//.addAll(paparazzi)){
+                if(p.collide(b.getX(), b.getY(), 35)){
+                    p.changeHP(-player.getWep().getDamage());
                     remove = true;
                 }
             }
@@ -317,13 +319,14 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
 			if (b.getX() > mapsize[XVAL] || b.getX() < 0 || b.getY() > mapsize[YVAL] || b.getY() < 0) {
 				remove = true;
 			}
+
             if(remove){
                 buliter.remove();
             }
 
 		}
 
-
+        //Explosions do splash damage based on how far away the enemy is to them, only explodes once then is gone
         for (Iterator<Explosion> exploiter = explosions.iterator(); exploiter.hasNext(); ) {
             Explosion exp = exploiter.next();
             for(Enemy e : fans){
@@ -332,139 +335,101 @@ class KanyePanel extends JPanel implements KeyListener, MouseMotionListener, Mou
             exploiter.remove();
         }
 
-        System.out.println(player.getX() + " curpos " + player.getY());
-        System.out.println(offset[0] + " offset " + offset[1]);
+        for(Iterator<Fan> faniter = fans.iterator();  faniter.hasNext();) {
+            Fan tmpf  = faniter.next();
 
+            tmpf.move(player, fans, paparazzi);
 
-        for(Iterator<Fans> faniter = fans.iterator();  faniter.hasNext();) {
-            Fans curenemy  = faniter.next();
-            double tmpang = Math.atan2(player.getY() - curenemy.getY(), player.getX() - curenemy.getX());
-            double tmpx = 2 * Math.cos(tmpang);
-            double tmpy = 2 * Math.sin(tmpang);
-
-            //moving towards player
-            double dx = player.getX() - curenemy.getX(); //delta x, total horizontal distance
-            double dy = player.getY() - curenemy.getY(); //delta y, total vertical distance
-            double dist = Math.max(1, Math.hypot(dx, dy));
-            double d2 = Math.pow(dist, 2);
-            tmpx -= 130 * dx / d2;
-            tmpy -= 130 * dy / d2;
-
-            for (Fans s : fans) {
-                if (s != curenemy) { //enemy will always collide with itself
-                    dx = curenemy.getX() - s.getX(); //delta x, total horizontal distance
-                    dy = curenemy.getY() - s.getY(); //delta y, total vertical distance
-                    dist = Math.max(1, Math.hypot(dx, dy));
-                    if (dist < 60) {
-                        d2 = Math.pow(dist, 2);
-                        tmpx += 180 * dx / d2;
-                        tmpy += 180 * dy / d2;
-                    }
-                }
-            }
-
-            for (Paparazzi p : paparazzi) {
-                dx = curenemy.getX() - p.getX(); //delta x, total horizontal distance
-                dy = curenemy.getY() - p.getY(); //delta y, total vertical distance
-                dist = Math.max(1, Math.hypot(dx, dy));
-                if (dist < 60) {
-                    d2 = Math.pow(dist, 2);
-                    tmpx += 180 * dx / d2;
-                    tmpy += 180 * dy / d2;
-                }
-            }
-
-            /*if (edge) {//compensate for faster movement due to scrolling at a speed of 5
-                tmpx += displacement[XVAL] * (player.getSpeed() - 2);
-                tmpy += displacement[YVAL] * (player.getSpeed() - 2);
-            }*/
-            curenemy.move(tmpx, tmpy, tmpang);
-            curenemy.attack(player);
-
-            if(curenemy.getHP() <= 0){
+            if(tmpf.getHP() <= 0){
                 faniter.remove();
             }
         }
 
         for(Iterator<Paparazzi> pappIter = paparazzi.iterator();  pappIter.hasNext();){
-            Paparazzi p = pappIter.next();
+            Paparazzi tmpp = pappIter.next();
 
-            if(p.checkRemove()){
-                vanList.remove(p.getHome());
+            if(tmpp.checkRemove()){
+                vanList.remove(tmpp.getHome()); //try and make this slowly fade away
                 pappIter.remove();
                 for (int i  = 0; i < 10; i++) {
-                    fans.add(new Fans(1000 - 100 * i + offset[XVAL], offset[YVAL], 50, 50, fanpic));
+                    int[] tmppos = getValidPoints();
+                    fans.add(new Fan(tmppos[XVAL], tmppos[YVAL], 50, 50, enemyPics[rn.nextInt(3)]));
                 }
             }
 
-            p.move(player, paparazzi, fans, displacement);
-        }
-
-        for(Iterator<Van> vanIter = vanList.iterator();  vanIter.hasNext();){
-            Van curvan = vanIter.next();
-            if(edge){
-                curvan.changePos(displacement[XVAL] * player.getSpeed(), displacement[YVAL] * player.getSpeed());
-            }
+            tmpp.move(player, paparazzi, fans);
         }
         //endregion
 	}
 
-    public int[] getValidPoint(){
+    //for a point to be valid, it has to be off the current screen (not spawning enemies right next to the player, unfair), on the map and not colliding with any walls
+    public int[] getValidPoints(){
         int randx, randy;
         do{
             randx = rn.nextInt(5000);
             randy = rn.nextInt(5000);
-        }while(randx < 0 || randx > 5000 || randy < 0 || randy > 5000); //checks if point is colliding or off the map
-
+        }while(!isOffscreen(randx, randy) && isColliding(randx, randy)); //has to be on map, not colliding, and off the screen
 
         return new int[]{randx, randy};
 
     }
 
-    /*public boolean isOffscreen(int x, int y){
-        if((x < player.getX()))
-    }*/
-
-    public boolean isOffscreen(double x, double y){
-        boolean valid = true;
-        //f()
-        return true;
+    public boolean isOffscreen(double ox, double oy){
+        if(player.getX() - ox > player.getX() + offset[XVAL] || player.getY() - oy > player.getY() + offset[YVAL] || 1500 - (player.getX() + offset[XVAL]) < ox - player.getX() || 1000 - (player.getY() + offset[YVAL]) < oy - player.getY()){
+            return true;
+        }
+        return false;
     }
 
+    public boolean isColliding(double ox, double oy){ //checks mask to see if its colliding with points
+        return false;
+    }
 
     public void paintComponent(Graphics g){
+        //System.out.println(offset[0] + " " + offset[1]);
         g.drawImage(map, offset[XVAL], offset[YVAL], this);
 
         for(Bullet b : bullets){
-			b.draw(g, this, offset);
+            if(!isOffscreen(b.getX(), b.getY())){
+                b.draw(g, this, offset);
+            }
 		}
 
-        for(Fans e: fans ){
-            e.draw(g, this);
+        for(Fan e: fans ){
+            if(!isOffscreen(e.getX(), e.getY())){
+                e.draw(g, this, offset);
+            }
         }
 
         for (TripMine t : tripmines){
-            t.draw(g, this);
+            if(!isOffscreen(t.getX(), t.getY())){
+                t.draw(g, this, offset);
+            }
         }
 
         for (Paparazzi p: paparazzi){
-            if(isOffscreen(p.getX(), p.getY())){
-                p.draw(g, this, false);
+            if(isOffscreen(p.getX(), p.getY())){ //arrow will point to enemy if offscreen
+                p.draw(g, this, offset, false, enemyPics);
             }
             else{
-                p.draw(g, this, false);
+                p.draw(g, this, offset, false, enemyPics);
             }
 
         }
 
         for(Van v : vanList){
-            v.draw(g, this);
+            if(!isOffscreen(v.getX(), v.getY())){
+                v.draw(g, this, offset);
+            }
         }
+
         for (Powerup p :  powerList){
-            p.draw(g, this);
+            if(!isOffscreen(p.getX(), p.getY())){
+                p.draw(g, this, offset);
+            }
         }
-        //System.out.println((player.getX()) + " " + (player.getY()));
-		player.draw(g, this);
+
+		player.draw(g, this, offset);
 
 	}
 

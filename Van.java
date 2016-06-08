@@ -10,14 +10,12 @@ import javax.swing.*;
 
 public class Van {
     private double x, y;
-    private boolean letsmove;
     private BufferedImage sprite;
 
     public Van(double x, double y, BufferedImage sprite) {
         this.x = x;
         this.y = y;
         this.sprite = sprite;
-        letsmove = false;
     }
 
     public void move(double dx, double dy) {
@@ -25,11 +23,6 @@ public class Van {
             x += dx;
             y += dy;
         }
-    }
-
-    public void changePos(double x, double y){
-        this.x += x;
-        this.y += y;
     }
 
     public double getX(){
@@ -40,8 +33,9 @@ public class Van {
     }
 
 
-    public void draw(Graphics g, KanyePanel k) {
-        g.drawImage(sprite, (int) Math.round(x) - 100, (int) Math.round(y) - 50, k);
+    public void draw(Graphics g, KanyePanel k, int[] offset) {
+        //System.out.println((int) Math.round(x - offset[0] - 100) + " " + (int) Math.round(y - offset[1] - 50));
+        g.drawImage(sprite, (int) Math.round(x + offset[0] - 100), (int) Math.round(y + offset[1] - 50), k);
 
     }
 
