@@ -18,10 +18,6 @@ public class Animation {
         curFrame = 0;
     }
 
-    public void start(){
-        playing = true;
-    }
-
     public void stop(){
         playing = false;
     }
